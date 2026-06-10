@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: subtrack
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: subtrack
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subtrack -d subtrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      API_KEY: "dev-local-key"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: subtrack
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: subtrack
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres-data:
