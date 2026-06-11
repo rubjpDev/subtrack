@@ -51,6 +51,36 @@ Both environment variables are mandatory — the server fails fast at startup if
 Point your MCP client at `uv run subtrack-mcp` with the same two variables set, and it connects
 over stdio.
 
+### Connect to Claude Desktop
+
+Claude Desktop launches the server itself, so don't run `uv run subtrack-mcp` manually for this —
+just make sure the backend (step 1 above) is running. Add an entry to Claude Desktop's config
+file (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+```json
+{
+  "mcpServers": {
+    "subtrack": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/subtrack/mcp",
+        "run",
+        "subtrack-mcp"
+      ],
+      "env": {
+        "SUBTRACK_API_URL": "http://localhost:8080",
+        "SUBTRACK_API_KEY": "dev-local-key"
+      }
+    }
+  }
+}
+```
+
+`--directory` lets `uv` find this project's `pyproject.toml` and `.venv` regardless of Claude
+Desktop's working directory. After saving the config, fully quit and reopen Claude Desktop — the
+7 tools above should appear under the 🔌 icon in a new chat.
+
 Dev gates (the same ones CI runs):
 
 ```sh
