@@ -40,12 +40,25 @@ agent's choices small and unambiguous.
 Requires [Docker](https://docs.docker.com/), Go (see `api/go.mod`), and
 [uv](https://docs.astral.sh/uv/).
 
+### One command demo
+
+```sh
+make demo
+```
+
+This starts Postgres 16 (5432) and the API (8080) in Docker, applies migrations, seeds 3 sample
+subscriptions, and prints the spending summary. Run `make down` afterwards to stop the stack and
+remove its data volume.
+
+### Manual setup
+
 ```sh
 # 1. Start the backend: Postgres 16 (5432) and the API (8080).
 cd api
 cp .env.example .env   # optional — compose ships working dev defaults
 docker compose up -d
-make migrate-up
+DATABASE_URL="postgres://subtrack:devpassword@localhost:5432/subtrack?sslmode=disable" \
+  API_KEY=dev-local-key make migrate-up
 
 # 2. Sanity check.
 curl http://localhost:8080/healthz
@@ -58,6 +71,10 @@ export SUBTRACK_API_URL=http://localhost:8080
 export SUBTRACK_API_KEY=dev-local-key   # matches api/.env.example
 uv run subtrack-mcp
 ```
+
+> Note: `make migrate-up` runs on the host via `go run`, so it needs `DATABASE_URL` (or
+> `POSTGRES_*`) and `API_KEY` set in your shell — `.env` is only read by `docker compose`, not by
+> the Go binaries.
 
 `SUBTRACK_API_URL` and `SUBTRACK_API_KEY` are mandatory — the MCP server fails fast at startup if
 either is missing. Point your MCP client at `uv run subtrack-mcp` with the same two variables set,
